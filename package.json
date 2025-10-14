@@ -1,0 +1,17 @@
+{
+  "name": "queens-campus-geoguesser",
+  "version": "1.0.0",
+  "description": "Guess Queen's University campus locations from real photos",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}

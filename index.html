@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Queen's & Downtown Kingston GeoGuesser</title>
+  <meta name="description" content="Guess Queen's University and downtown Kingston locations from real photos">
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-content">
+      <div class="kingston-skyline">
+        <div class="skyline-building"></div>
+        <div class="skyline-building"></div>
+        <div class="skyline-tower"></div>
+        <div class="skyline-building"></div>
+        <div class="skyline-building"></div>
+      </div>
+      <h1 class="loading-title">Kingston GeoGuesser</h1>
+      <p class="loading-subtitle">Queen's University & Downtown</p>
+      <div class="loading-bar">
+        <div class="loading-progress"></div>
+      </div>
+      <p class="loading-text">Loading the Limestone City...</p>
+    </div>
+  </div>
+
+  <div id="app" class="app-hidden">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1>🏛️ Kingston GeoGuesser</h1>
+        <p class="tagline">Queen's University & Downtown Kingston</p>
+      </div>
+      <div class="header-stats">
+        <span id="personalBest" class="personal-best">🏆 Best: 0</span>
+      </div>
+    </header>
+
+    <!-- Main game container -->
+    <div class="game-container">
+      <!-- Left: Photo and Game Area -->
+      <div class="game-panel">
+        <!-- Photo Display -->
+        <div id="photoContainer" class="photo-container hidden">
+          <div id="photoFrame" class="photo-frame">
+            <img id="campusPhoto" src="" alt="Kingston location" />
+            <div id="photoOverlay" class="photo-overlay hidden">
+              <div class="loading-spinner"></div>
+              <p>Loading Kingston photo...</p>
+            </div>
+          </div>
+          
+          <!-- Photo Info -->
+          <div class="photo-info">
+            <div class="round-info">
+              <span id="roundDisplay">Round 1 of 5</span>
+              <span id="scoreDisplay">Score: 0</span>
+            </div>
+            <div class="hint-container">
+              <button id="hintBtn" class="btn-hint" disabled>💡 Get Hint (-10 pts)</button>
+              <div id="hintText" class="hint-text hidden"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="controls-container">
+          <button id="readyToGuessBtn" class="btn-primary">Ready to Guess</button>
+          <button id="skipBtn" class="btn-secondary">Skip Photo</button>
+        </div>
+
+        <!-- Kingston Map (initially hidden) -->
+        <div id="mapContainer" class="map-container hidden">
+          <div class="map-header">
+            <h3>🗺️ Click where you think this location is</h3>
+            <button id="cancelGuessBtn" class="btn-secondary">Cancel</button>
+          </div>
+          <div id="kingstonMap" class="kingston-map">
+            <!-- Detailed map will be rendered here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Game Info & Stats -->
+      <div class="info-panel">
+        <!-- Game Setup -->
+        <div id="gameSetup" class="card">
+          <h3>🎯 Start New Game</h3>
+          <div class="form-group">
+            <label for="playerName">Your Name</label>
+            <input type="text" id="playerName" placeholder="Enter your name" maxlength="20" />
+          </div>
+          <div class="form-group">
+            <label for="difficulty">Difficulty</label>
+            <select id="difficulty">
+              <option value="easy">Easy (5 rounds)</option>
+              <option value="medium" selected>Medium (10 rounds)</option>
+              <option value="hard">Hard (15 rounds)</option>
+            </select>
+          </div>
+          <button id="startGameBtn" class="btn-primary">Start Game</button>
+        </div>
+
+        <!-- Game Results -->
+        <div id="gameResults" class="card hidden">
+          <h3>🎉 Game Complete!</h3>
+          <div class="final-score">
+            <div class="score-item">
+              <span class="label">Final Score</span>
+              <span id="finalScore" class="value">0</span>
+            </div>
+            <div class="score-item">
+              <span class="label">Accuracy</span>
+              <span id="accuracy" class="value">0%</span>
+            </div>
+            <div class="score-item">
+              <span class="label">Average Distance</span>
+              <span id="avgDistance" class="value">0m</span>
+            </div>
+          </div>
+          <div class="button-group">
+            <button id="playAgainBtn" class="btn-primary">Play Again</button>
+            <button id="shareScoreBtn" class="btn-secondary">Share Score</button>
+          </div>
+        </div>
+
+        <!-- About Kingston -->
+        <div class="card">
+          <h3>🏛️ About Kingston</h3>
+          <div class="kingston-facts">
+            <p><strong>Queen's University:</strong> Founded 1841</p>
+            <p><strong>Downtown:</strong> Historic limestone city</p>
+            <p><strong>Location:</strong> Between Toronto & Montreal</p>
+            <p><strong>Nickname:</strong> "Limestone City"</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>
+        Photos via Google Street View • 
+        <a href="https://www.queensu.ca/" target="_blank">Queen's University</a> • 
+        <a href="https://www.cityofkingston.ca/" target="_blank">City of Kingston</a>
+      </p>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
