@@ -4,6 +4,7 @@
 
 import { MapRenderer } from './mapRenderer.js';
 import { StaticMap } from './staticMap.js';
+import { SimpleGoogleMaps } from './simpleGoogleMaps.js';
 
 export const UI = {
   // DOM elements
@@ -11,6 +12,7 @@ export const UI = {
   
   // Game components
   mapRenderer: null,
+  simpleGoogleMaps: null,
   
   // Callbacks
   callbacks: {},
@@ -49,7 +51,7 @@ export const UI = {
       // Game setup
       gameSetup: document.getElementById('gameSetup'),
       playerName: document.getElementById('playerName'),
-      difficulty: document.getElementById('difficulty'),
+      playerEmail: document.getElementById('playerEmail'),
       startGameBtn: document.getElementById('startGameBtn'),
       
       // Game results
@@ -59,31 +61,58 @@ export const UI = {
       avgDistance: document.getElementById('avgDistance'),
       playAgainBtn: document.getElementById('playAgainBtn'),
       shareScoreBtn: document.getElementById('shareScoreBtn'),
+      viewLeaderboardBtn: document.getElementById('viewLeaderboardBtn'),
       
-      // Photo display
-      photoContainer: document.getElementById('photoContainer'),
-      campusPhoto: document.getElementById('campusPhoto'),
+      // Leaderboard
+      leaderboardContainer: document.getElementById('leaderboardContainer'),
+      leaderboardList: document.getElementById('leaderboardList'),
+      closeLeaderboardBtn: document.getElementById('closeLeaderboardBtn'),
+      
+      // Street view display
+      streetViewContainer: document.getElementById('streetViewContainer'),
+      streetViewPhoto: document.getElementById('streetViewPhoto'),
       photoOverlay: document.getElementById('photoOverlay'),
-      roundDisplay: document.getElementById('roundDisplay'),
-      scoreDisplay: document.getElementById('scoreDisplay'),
+      
+      // Header elements
+      currentScore: document.getElementById('currentScore'),
+      currentRound: document.getElementById('currentRound'),
+      totalRounds: document.getElementById('totalRounds'),
       
       // Controls
-      readyToGuessBtn: document.getElementById('readyToGuessBtn'),
+      makeGuessBtn: document.getElementById('makeGuessBtn'),
       skipBtn: document.getElementById('skipBtn'),
       hintBtn: document.getElementById('hintBtn'),
       hintText: document.getElementById('hintText'),
+      hintDisplay: document.getElementById('hintDisplay'),
       
       // Map elements
       mapContainer: document.getElementById('mapContainer'),
       kingstonMap: document.getElementById('kingstonMap'),
       cancelGuessBtn: document.getElementById('cancelGuessBtn'),
-      
-      // Personal best (now in header)
-      personalBest: document.getElementById('personalBest'),
+      zoomInBtn: document.getElementById('zoomInBtn'),
+      zoomOutBtn: document.getElementById('zoomOutBtn'),
+      resetViewBtn: document.getElementById('resetViewBtn'),
       
       // Loading screen
       loadingScreen: document.getElementById('loadingScreen'),
       app: document.getElementById('app'),
+      
+      // Header buttons
+      settingsBtn: document.getElementById('settingsBtn'),
+      exitBtn: document.getElementById('exitBtn'),
+      
+      // Modals
+      settingsModal: document.getElementById('settingsModal'),
+      exitModal: document.getElementById('exitModal'),
+      closeSettingsBtn: document.getElementById('closeSettingsBtn'),
+      saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+      confirmExitBtn: document.getElementById('confirmExitBtn'),
+      cancelExitBtn: document.getElementById('cancelExitBtn'),
+      
+      // Settings
+      soundToggle: document.getElementById('soundToggle'),
+      hintsToggle: document.getElementById('hintsToggle'),
+      autoSubmitToggle: document.getElementById('autoSubmitToggle'),
     };
   },
 
@@ -97,7 +126,7 @@ export const UI = {
     });
 
     // Game controls
-    this.elements.readyToGuessBtn.addEventListener('click', () => {
+    this.elements.makeGuessBtn.addEventListener('click', () => {
       this.showDetailedMap();
     });
 
@@ -107,6 +136,25 @@ export const UI = {
     
     this.elements.cancelGuessBtn.addEventListener('click', () => {
       this.hideDetailedMap();
+    });
+
+    // Map controls
+    this.elements.zoomInBtn.addEventListener('click', () => {
+      if (this.simpleGoogleMaps) {
+        this.simpleGoogleMaps.setZoom(this.simpleGoogleMaps.getZoom() + 1);
+      }
+    });
+
+    this.elements.zoomOutBtn.addEventListener('click', () => {
+      if (this.simpleGoogleMaps) {
+        this.simpleGoogleMaps.setZoom(this.simpleGoogleMaps.getZoom() - 1);
+      }
+    });
+
+    this.elements.resetViewBtn.addEventListener('click', () => {
+      if (this.simpleGoogleMaps) {
+        this.simpleGoogleMaps.resetView();
+      }
     });
 
     this.elements.hintBtn.addEventListener('click', () => {
@@ -130,6 +178,66 @@ export const UI = {
     // Enter key to start
     this.elements.playerName.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') this.startGame();
+    });
+
+    // Email validation
+    this.elements.playerEmail.addEventListener('input', () => {
+      this.validateEmail();
+    });
+
+    // Leaderboard
+    this.elements.viewLeaderboardBtn.addEventListener('click', () => {
+      this.showLeaderboard();
+    });
+
+    this.elements.closeLeaderboardBtn.addEventListener('click', () => {
+      this.hideLeaderboard();
+    });
+
+    // Close leaderboard on backdrop click
+    this.elements.leaderboardContainer.addEventListener('click', (e) => {
+      if (e.target === this.elements.leaderboardContainer) {
+        this.hideLeaderboard();
+      }
+    });
+
+    // Header buttons
+    this.elements.settingsBtn.addEventListener('click', () => {
+      this.showSettings();
+    });
+
+    this.elements.exitBtn.addEventListener('click', () => {
+      this.showExitConfirmation();
+    });
+
+    // Modal handlers
+    this.elements.closeSettingsBtn.addEventListener('click', () => {
+      this.hideSettings();
+    });
+
+    this.elements.saveSettingsBtn.addEventListener('click', () => {
+      this.saveSettings();
+    });
+
+    this.elements.confirmExitBtn.addEventListener('click', () => {
+      this.confirmExit();
+    });
+
+    this.elements.cancelExitBtn.addEventListener('click', () => {
+      this.hideExitConfirmation();
+    });
+
+    // Close modals on backdrop click
+    this.elements.settingsModal.addEventListener('click', (e) => {
+      if (e.target === this.elements.settingsModal) {
+        this.hideSettings();
+      }
+    });
+
+    this.elements.exitModal.addEventListener('click', (e) => {
+      if (e.target === this.elements.exitModal) {
+        this.hideExitConfirmation();
+      }
     });
   },
 
@@ -158,7 +266,9 @@ export const UI = {
   loadSavedInputs() {
     try {
       const savedName = localStorage.getItem('kingston_name');
+      const savedEmail = localStorage.getItem('kingston_email');
       if (savedName) this.elements.playerName.value = savedName;
+      if (savedEmail) this.elements.playerEmail.value = savedEmail;
     } catch (err) {
       console.warn('Failed to load saved inputs:', err);
     }
@@ -170,8 +280,31 @@ export const UI = {
   saveInputs() {
     try {
       localStorage.setItem('kingston_name', this.elements.playerName.value);
+      localStorage.setItem('kingston_email', this.elements.playerEmail.value);
     } catch (err) {
       console.warn('Failed to save inputs:', err);
+    }
+  },
+
+  /**
+   * Validate email format
+   */
+  isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  },
+
+  /**
+   * Validate email input
+   */
+  validateEmail() {
+    const email = this.elements.playerEmail.value.trim();
+    const isValid = this.isValidEmail(email);
+    
+    if (email && !isValid) {
+      this.elements.playerEmail.style.borderColor = '#dc3545';
+    } else {
+      this.elements.playerEmail.style.borderColor = '';
     }
   },
 
@@ -180,18 +313,27 @@ export const UI = {
    */
   startGame() {
     const name = this.elements.playerName.value.trim();
-    const difficulty = this.elements.difficulty.value;
+    const email = this.elements.playerEmail.value.trim();
 
     if (!name) {
       alert('Please enter your name!');
       return;
     }
 
+    if (!email || !this.isValidEmail(email)) {
+      alert('Please enter a valid email address!');
+      return;
+    }
+
+    // Hide setup and show game
+    this.elements.gameSetup.classList.add('hidden');
+    this.elements.streetViewContainer.classList.remove('hidden');
+
     // Start game via callback
     if (this.callbacks.onStartGame) {
       this.callbacks.onStartGame({
         playerName: name,
-        difficulty,
+        playerEmail: email,
       });
     }
   },
@@ -212,17 +354,18 @@ export const UI = {
    * Show round info
    */
   showRound(round, total, score) {
-    this.elements.roundDisplay.textContent = `Round ${round} of ${total}`;
-    this.elements.scoreDisplay.textContent = `Score: ${score.toLocaleString()}`;
+    this.elements.currentRound.textContent = round;
+    this.elements.totalRounds.textContent = total;
+    this.elements.currentScore.textContent = score.toLocaleString();
   },
 
   /**
-   * Show campus photo
+   * Show street view photo
    */
   showPhoto(imageUrl, landmark) {
-    this.elements.photoContainer.classList.remove('hidden');
-    this.elements.campusPhoto.src = imageUrl;
-    this.elements.campusPhoto.alt = 'Kingston location';
+    this.elements.streetViewContainer.classList.remove('hidden');
+    this.elements.streetViewPhoto.src = imageUrl;
+    this.elements.streetViewPhoto.alt = 'Kingston location';
     this.elements.photoOverlay.classList.add('hidden');
     
     // Store current landmark for map centering
@@ -233,8 +376,8 @@ export const UI = {
    * Hide photo
    */
   hidePhoto() {
-    this.elements.photoContainer.classList.add('hidden');
-    this.elements.campusPhoto.src = '';
+    this.elements.streetViewContainer.classList.add('hidden');
+    this.elements.streetViewPhoto.src = '';
     this.elements.photoOverlay.classList.remove('hidden');
   },
 
@@ -243,7 +386,7 @@ export const UI = {
    */
   enableGuess() {
     this.elements.makeGuessBtn.disabled = false;
-    this.elements.makeGuessBtn.textContent = 'Make Your Guess';
+    this.elements.makeGuessBtn.textContent = 'Make a guess';
     this.elements.hintBtn.disabled = false;
     this.elements.skipBtn.disabled = false;
   },
@@ -272,22 +415,22 @@ export const UI = {
    */
   resetHint() {
     this.elements.hintBtn.disabled = false;
-    this.elements.hintBtn.textContent = '💡 Get Hint (-100 pts)';
-    this.elements.hintText.classList.add('hidden');
+    this.elements.hintBtn.textContent = '💡';
+    this.elements.hintDisplay.classList.add('hidden');
   },
 
   /**
    * Show hint
    */
   showHint(hint, hintNumber, totalHints) {
-    this.elements.hintText.innerHTML = `<strong>Hint ${hintNumber}/${totalHints}:</strong> ${hint}`;
-    this.elements.hintText.classList.remove('hidden');
+    this.elements.hintText.textContent = hint;
+    this.elements.hintDisplay.classList.remove('hidden');
     
     if (hintNumber >= totalHints) {
       this.elements.hintBtn.disabled = true;
-      this.elements.hintBtn.textContent = 'No more hints';
+      this.elements.hintBtn.textContent = '💡';
     } else {
-      this.elements.hintBtn.textContent = `💡 Get Hint ${hintNumber + 1} (-100 pts)`;
+      this.elements.hintBtn.textContent = '💡';
     }
   },
 
@@ -378,57 +521,37 @@ export const UI = {
    * Show detailed map for guessing
    */
   async showDetailedMap() {
-    console.log('🗺️ Showing detailed map for guessing...');
+    console.log('🗺️ Showing Simple Google Maps for guessing...');
     
     if (!this.currentLandmark) {
       console.error('No current landmark set!');
       return;
     }
     
-    // Hide the ready button and show map
-    this.elements.readyToGuessBtn.style.display = 'none';
+    // Initialize the simple Google Maps immediately
+    this.initializeMap();
+  },
+
+  /**
+   * Initialize the simple Google Maps
+   */
+  initializeMap() {
+    // Hide the street view and show map
+    this.elements.streetViewContainer.classList.add('hidden');
     this.elements.mapContainer.classList.remove('hidden');
     
-    // Center map around the general Kingston area (not the exact landmark location)
-    // Use a central point between campus and downtown
-    const centerLat = 44.231;
-    const centerLon = -76.498;
-    const mapUrl = StaticMap.getDetailedMapUrl(centerLat, centerLon, 15, 800, 600);
-    
-    // Store the center and zoom for coordinate conversion
-    this.mapCenter = { lat: centerLat, lon: centerLon };
-    this.mapZoom = 15;
-    
-    // Create map image
-    const mapImg = document.createElement('img');
-    mapImg.src = mapUrl;
-    mapImg.style.width = '100%';
-    mapImg.style.height = '100%';
-    mapImg.style.objectFit = 'contain';
-    mapImg.style.cursor = 'crosshair';
-    
-    // Clear existing content
-    this.elements.kingstonMap.innerHTML = '';
-    this.elements.kingstonMap.appendChild(mapImg);
-    
-    // Add click handler
-    mapImg.addEventListener('click', (e) => {
-      const rect = mapImg.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const clickY = e.clientY - rect.top;
-      
-      // Convert screen coordinates to lat/lon
-      const { lat, lon } = StaticMap.screenToLatLon(
-        clickX, clickY, 800, 600, this.mapCenter.lat, this.mapCenter.lon, this.mapZoom
-      );
-      
-      console.log('🎯 Map clicked at:', lat, lon);
+    // Initialize Simple Google Maps with proper callback
+    this.simpleGoogleMaps = SimpleGoogleMaps;
+    this.simpleGoogleMaps.init(this.elements.kingstonMap, (lat, lon) => {
+      console.log('🎯 Simple Google Maps clicked at:', lat, lon);
       
       // Make the guess
       this.handleMapGuess(lat, lon);
       
-      // Hide the map
-      this.hideDetailedMap();
+      // Hide the map after a short delay
+      setTimeout(() => {
+        this.hideDetailedMap();
+      }, 1000);
     });
     
     this.isMapVisible = true;
@@ -438,10 +561,16 @@ export const UI = {
    * Hide detailed map
    */
   hideDetailedMap() {
-    console.log('🗺️ Hiding detailed map...');
+    console.log('🗺️ Hiding Simple Google Maps...');
+    
+    // Clean up Simple Google Maps
+    if (this.simpleGoogleMaps) {
+      this.simpleGoogleMaps.destroy();
+      this.simpleGoogleMaps = null;
+    }
     
     this.elements.mapContainer.classList.add('hidden');
-    this.elements.readyToGuessBtn.style.display = 'block';
+    this.elements.streetViewContainer.classList.remove('hidden');
     this.isMapVisible = false;
   },
 
@@ -465,5 +594,164 @@ export const UI = {
         this.elements.app.classList.remove('app-hidden');
       }, 500);
     }
+  },
+
+  /**
+   * Show settings modal
+   */
+  showSettings() {
+    this.elements.settingsModal.classList.remove('hidden');
+    this.loadSettings();
+  },
+
+  /**
+   * Hide settings modal
+   */
+  hideSettings() {
+    this.elements.settingsModal.classList.add('hidden');
+  },
+
+  /**
+   * Show exit confirmation
+   */
+  showExitConfirmation() {
+    this.elements.exitModal.classList.remove('hidden');
+  },
+
+  /**
+   * Hide exit confirmation
+   */
+  hideExitConfirmation() {
+    this.elements.exitModal.classList.add('hidden');
+  },
+
+  /**
+   * Load settings from localStorage
+   */
+  loadSettings() {
+    const settings = JSON.parse(localStorage.getItem('kingstonGeoguesserSettings') || '{}');
+    this.elements.soundToggle.checked = settings.sound !== false;
+    this.elements.hintsToggle.checked = settings.hints !== false;
+    this.elements.autoSubmitToggle.checked = settings.autoSubmit !== false;
+  },
+
+  /**
+   * Save settings to localStorage
+   */
+  saveSettings() {
+    const settings = {
+      sound: this.elements.soundToggle.checked,
+      hints: this.elements.hintsToggle.checked,
+      autoSubmit: this.elements.autoSubmitToggle.checked,
+    };
+    localStorage.setItem('kingstonGeoguesserSettings', JSON.stringify(settings));
+    this.hideSettings();
+  },
+
+  /**
+   * Confirm exit and reset to menu
+   */
+  confirmExit() {
+    this.hideExitConfirmation();
+    this.resetToMenu();
+  },
+
+  /**
+   * Reset to menu
+   */
+  resetToMenu() {
+    // Hide all game elements
+    this.elements.streetViewContainer.classList.add('hidden');
+    this.elements.mapContainer.classList.add('hidden');
+    this.elements.gameResults.classList.add('hidden');
+    
+    // Show setup
+    this.elements.gameSetup.classList.remove('hidden');
+    
+    // Reset form
+    this.elements.playerName.value = '';
+    this.elements.playerEmail.value = '';
+    
+    // Reset score display
+    this.elements.currentScore.textContent = '0';
+    this.elements.currentRound.textContent = '1';
+    this.elements.totalRounds.textContent = '5';
+    
+    // Reset hint
+    this.resetHint();
+    
+    // Reset to menu via callback
+    if (this.callbacks.onResetToMenu) {
+      this.callbacks.onResetToMenu();
+    }
+  },
+
+
+  /**
+   * Show leaderboard
+   */
+  showLeaderboard() {
+    this.elements.leaderboardContainer.classList.remove('hidden');
+    this.loadLeaderboard();
+  },
+
+  /**
+   * Hide leaderboard
+   */
+  hideLeaderboard() {
+    this.elements.leaderboardContainer.classList.add('hidden');
+  },
+
+  /**
+   * Load and display leaderboard
+   */
+  async loadLeaderboard() {
+    try {
+      // Get leaderboard data from Supabase
+      const { data, error } = await supabase
+        .from('scores')
+        .select('*')
+        .order('score', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+
+      this.displayLeaderboard(data || []);
+    } catch (error) {
+      console.error('Failed to load leaderboard:', error);
+      this.displayLeaderboard([]);
+    }
+  },
+
+  /**
+   * Display leaderboard entries
+   */
+  displayLeaderboard(entries) {
+    this.elements.leaderboardList.innerHTML = '';
+
+    if (entries.length === 0) {
+      this.elements.leaderboardList.innerHTML = '<p style="text-align: center; color: var(--geoguessr-gray); padding: 2rem;">No scores yet. Be the first to play!</p>';
+      return;
+    }
+
+    entries.forEach((entry, index) => {
+      const entryEl = document.createElement('div');
+      entryEl.className = 'leaderboard-entry';
+      
+      const rank = index + 1;
+      const rankClass = rank <= 3 ? 'top-3' : '';
+      
+      entryEl.innerHTML = `
+        <div class="leaderboard-rank ${rankClass}">${rank}</div>
+        <div class="leaderboard-email">${entry.player_email || 'No email'}</div>
+        <div class="leaderboard-info">
+          <div class="leaderboard-name">${entry.player_name}</div>
+          <div class="leaderboard-score">${entry.score.toLocaleString()} points</div>
+          <div class="leaderboard-date">${new Date(entry.created_at).toLocaleDateString()}</div>
+        </div>
+      `;
+      
+      this.elements.leaderboardList.appendChild(entryEl);
+    });
   },
 };

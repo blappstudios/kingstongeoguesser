@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Queen's & Downtown Kingston GeoGuesser</title>
   <meta name="description" content="Guess Queen's University and downtown Kingston locations from real photos">
   <link rel="stylesheet" href="/src/styles.css">
@@ -28,128 +28,186 @@
   </div>
 
   <div id="app" class="app-hidden">
-    <!-- Header -->
-    <header class="header">
-      <div class="header-content">
-        <h1>🏛️ Kingston GeoGuesser</h1>
-        <p class="tagline">Queen's University & Downtown Kingston</p>
+    <!-- GeoGuessr-style Header -->
+    <header class="geoguessr-header">
+      <div class="header-left">
+        <h1>Kingston GeoGuesser</h1>
+        <span class="game-mode">Queen's University & Downtown</span>
       </div>
-      <div class="header-stats">
-        <span id="personalBest" class="personal-best">🏆 Best: 0</span>
+      <div class="header-center">
+        <div class="score-display">
+          <span id="currentScore">0</span>
+          <span class="score-label">points</span>
+        </div>
+        <div class="round-display">
+          <span id="currentRound">1</span> / <span id="totalRounds">5</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button id="settingsBtn" class="header-btn" title="Settings">⚙️</button>
+        <button id="exitBtn" class="header-btn" title="Exit Game">✕</button>
       </div>
     </header>
 
-    <!-- Main game container -->
-    <div class="game-container">
-      <!-- Left: Photo and Game Area -->
-      <div class="game-panel">
-        <!-- Photo Display -->
-        <div id="photoContainer" class="photo-container hidden">
-          <div id="photoFrame" class="photo-frame">
-            <img id="campusPhoto" src="" alt="Kingston location" />
-            <div id="photoOverlay" class="photo-overlay hidden">
-              <div class="loading-spinner"></div>
-              <p>Loading Kingston photo...</p>
-            </div>
-          </div>
-          
-          <!-- Photo Info -->
-          <div class="photo-info">
-            <div class="round-info">
-              <span id="roundDisplay">Round 1 of 5</span>
-              <span id="scoreDisplay">Score: 0</span>
-            </div>
-            <div class="hint-container">
-              <button id="hintBtn" class="btn-hint" disabled>💡 Get Hint (-10 pts)</button>
-              <div id="hintText" class="hint-text hidden"></div>
-            </div>
+    <!-- Main Game Area -->
+    <div class="game-area">
+      <!-- Street View Photo -->
+      <div id="streetViewContainer" class="street-view-container hidden">
+        <div class="photo-wrapper">
+          <img id="streetViewPhoto" src="" alt="Kingston location" />
+          <div id="photoOverlay" class="photo-overlay hidden">
+            <div class="loading-spinner"></div>
+            <p>Loading...</p>
           </div>
         </div>
-
-        <!-- Game Controls -->
-        <div class="controls-container">
-          <button id="readyToGuessBtn" class="btn-primary">Ready to Guess</button>
-          <button id="skipBtn" class="btn-secondary">Skip Photo</button>
+        
+        <!-- GeoGuessr-style Controls -->
+        <div class="photo-controls">
+          <button id="makeGuessBtn" class="geoguessr-btn primary">Make a guess</button>
+          <button id="hintBtn" class="geoguessr-btn secondary">💡</button>
+          <button id="skipBtn" class="geoguessr-btn secondary">Skip</button>
         </div>
+      </div>
 
-        <!-- Kingston Map (initially hidden) -->
-        <div id="mapContainer" class="map-container hidden">
-          <div class="map-header">
-            <h3>🗺️ Click where you think this location is</h3>
-            <button id="cancelGuessBtn" class="btn-secondary">Cancel</button>
+      <!-- Map for Guessing -->
+      <div id="mapContainer" class="map-container hidden">
+        <div class="map-header">
+          <h2>Click on the map where you think this is</h2>
+          <div class="map-controls">
+            <button id="zoomInBtn" class="map-control-btn" title="Zoom In">+</button>
+            <button id="zoomOutBtn" class="map-control-btn" title="Zoom Out">-</button>
+            <button id="resetViewBtn" class="map-control-btn" title="Reset View">⌂</button>
+            <button id="cancelGuessBtn" class="geoguessr-btn secondary">Cancel</button>
           </div>
-          <div id="kingstonMap" class="kingston-map">
-            <!-- Detailed map will be rendered here -->
+        </div>
+        <div id="kingstonMap" class="kingston-map">
+          <!-- Interactive map will be rendered here -->
+        </div>
+        <div class="map-instructions">
+          <p>🖱️ Drag to pan • 🔍 Scroll to zoom • 👆 Click to guess • 🗺️ Google Maps</p>
+        </div>
+      </div>
+
+      <!-- Game Setup -->
+      <div id="gameSetup" class="setup-container">
+        <div class="setup-card">
+          <h2>Start New Game</h2>
+          <div class="setup-form">
+            <div class="form-group">
+              <label for="playerName">Your Name</label>
+              <input type="text" id="playerName" placeholder="Enter your name" maxlength="20" />
+            </div>
+            <div class="form-group">
+              <label for="playerEmail">Email Address</label>
+              <input type="email" id="playerEmail" placeholder="Enter your email" />
+            </div>
+            <button id="startGameBtn" class="geoguessr-btn primary large">Start Game</button>
           </div>
         </div>
       </div>
 
-      <!-- Right: Game Info & Stats -->
-      <div class="info-panel">
-        <!-- Game Setup -->
-        <div id="gameSetup" class="card">
-          <h3>🎯 Start New Game</h3>
-          <div class="form-group">
-            <label for="playerName">Your Name</label>
-            <input type="text" id="playerName" placeholder="Enter your name" maxlength="20" />
-          </div>
-          <div class="form-group">
-            <label for="difficulty">Difficulty</label>
-            <select id="difficulty">
-              <option value="easy">Easy (5 rounds)</option>
-              <option value="medium" selected>Medium (10 rounds)</option>
-              <option value="hard">Hard (15 rounds)</option>
-            </select>
-          </div>
-          <button id="startGameBtn" class="btn-primary">Start Game</button>
-        </div>
-
-        <!-- Game Results -->
-        <div id="gameResults" class="card hidden">
-          <h3>🎉 Game Complete!</h3>
-          <div class="final-score">
-            <div class="score-item">
-              <span class="label">Final Score</span>
-              <span id="finalScore" class="value">0</span>
+      <!-- Game Results -->
+      <div id="gameResults" class="results-container hidden">
+        <div class="results-card">
+          <h2>Game Complete!</h2>
+          <div class="results-stats">
+            <div class="stat-item">
+              <span class="stat-label">Final Score</span>
+              <span id="finalScore" class="stat-value">0</span>
             </div>
-            <div class="score-item">
-              <span class="label">Accuracy</span>
-              <span id="accuracy" class="value">0%</span>
+            <div class="stat-item">
+              <span class="stat-label">Accuracy</span>
+              <span id="accuracy" class="stat-value">0%</span>
             </div>
-            <div class="score-item">
-              <span class="label">Average Distance</span>
-              <span id="avgDistance" class="value">0m</span>
+            <div class="stat-item">
+              <span class="stat-label">Average Distance</span>
+              <span id="avgDistance" class="stat-value">0m</span>
             </div>
           </div>
-          <div class="button-group">
-            <button id="playAgainBtn" class="btn-primary">Play Again</button>
-            <button id="shareScoreBtn" class="btn-secondary">Share Score</button>
+          <div class="results-actions">
+            <button id="playAgainBtn" class="geoguessr-btn primary">Play Again</button>
+            <button id="shareScoreBtn" class="geoguessr-btn secondary">Share Score</button>
+            <button id="viewLeaderboardBtn" class="geoguessr-btn secondary">View Leaderboard</button>
           </div>
         </div>
+      </div>
 
-        <!-- About Kingston -->
-        <div class="card">
-          <h3>🏛️ About Kingston</h3>
-          <div class="kingston-facts">
-            <p><strong>Queen's University:</strong> Founded 1841</p>
-            <p><strong>Downtown:</strong> Historic limestone city</p>
-            <p><strong>Location:</strong> Between Toronto & Montreal</p>
-            <p><strong>Nickname:</strong> "Limestone City"</p>
+      <!-- Leaderboard -->
+      <div id="leaderboardContainer" class="leaderboard-container hidden">
+        <div class="leaderboard-card">
+          <div class="leaderboard-header">
+            <h2>🏆 Global Leaderboard</h2>
+            <button id="closeLeaderboardBtn" class="close-btn">✕</button>
+          </div>
+          <div class="leaderboard-content">
+            <div id="leaderboardList" class="leaderboard-list">
+              <!-- Leaderboard entries will be populated here -->
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-      <p>
-        Photos via Google Street View • 
-        <a href="https://www.queensu.ca/" target="_blank">Queen's University</a> • 
-        <a href="https://www.cityofkingston.ca/" target="_blank">City of Kingston</a>
-      </p>
-    </footer>
+    <!-- Hint Display -->
+    <div id="hintDisplay" class="hint-display hidden">
+      <div class="hint-content">
+        <span id="hintText"></span>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button id="closeSettingsBtn" class="close-btn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-group">
+            <label for="soundToggle">Sound Effects</label>
+            <input type="checkbox" id="soundToggle" checked>
+          </div>
+          <div class="setting-group">
+            <label for="hintsToggle">Show Hints</label>
+            <input type="checkbox" id="hintsToggle" checked>
+          </div>
+          <div class="setting-group">
+            <label for="autoSubmitToggle">Auto-submit guesses</label>
+            <input type="checkbox" id="autoSubmitToggle" checked>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="saveSettingsBtn" class="geoguessr-btn primary">Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exit Confirmation Modal -->
+    <div id="exitModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Exit Game</h2>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to exit? Your current progress will be lost.</p>
+        </div>
+        <div class="modal-footer">
+          <button id="confirmExitBtn" class="geoguessr-btn primary">Exit</button>
+          <button id="cancelExitBtn" class="geoguessr-btn secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script type="module" src="/src/main.js"></script>
-</body>
-</html>
+        <!-- Google Maps JavaScript API -->
+        <script>
+          // Global callback for Google Maps
+          window.initGoogleMaps = function() {
+            console.log('🗺️ Google Maps API loaded');
+            window.googleMapsLoaded = true;
+          };
+        </script>
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initGoogleMaps&loading=async"></script>
+        <script type="module" src="/src/main.js"></script>
+      </body>
+      </html>

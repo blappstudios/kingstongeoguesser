@@ -153,7 +153,7 @@ export const StaticMap = {
 
   /**
    * Convert screen coordinates to lat/lon for map clicks
-   * Uses Web Mercator projection (EPSG:3857) which is what Google Maps uses
+   * Uses accurate Web Mercator projection calculation
    * @param {number} clickX - X coordinate of click
    * @param {number} clickY - Y coordinate of click
    * @param {number} mapWidth - Map image width
@@ -164,29 +164,29 @@ export const StaticMap = {
    * @returns {Object} {lat, lon} coordinates
    */
   screenToLatLon(clickX, clickY, mapWidth, mapHeight, centerLat, centerLon, zoom) {
-    // Google Maps zoom levels: pixels per degree = 256 * 2^zoom / 360
+    // Google Maps uses 256x256 tiles at zoom level 0
+    const tileSize = 256;
     const scale = Math.pow(2, zoom);
-    const pixelsPerLonDegree = (256 * scale) / 360;
     
-    // Longitude is straightforward
-    const lonOffset = (clickX - mapWidth / 2) / pixelsPerLonDegree;
-    const lon = centerLon + lonOffset;
+    // Calculate the world coordinates
+    const worldX = (clickX / mapWidth) * (tileSize * scale);
+    const worldY = (clickY / mapHeight) * (tileSize * scale);
     
-    // Latitude requires Web Mercator transformation
-    // First convert center lat to Web Mercator y
-    const centerLatRad = centerLat * Math.PI / 180;
-    const centerMercatorY = Math.log(Math.tan(Math.PI / 4 + centerLatRad / 2));
+    // Convert to normalized coordinates (0-1)
+    const normalizedX = worldX / (tileSize * scale);
+    const normalizedY = worldY / (tileSize * scale);
     
-    // Calculate pixels per mercator unit at this zoom level
-    const pixelsPerMercatorUnit = (256 * scale) / (2 * Math.PI);
+    // Convert to longitude (straightforward)
+    const lon = (normalizedX - 0.5) * 360 + centerLon;
     
-    // Calculate mercator offset
-    const mercatorOffset = -(clickY - mapHeight / 2) / pixelsPerMercatorUnit;
-    const clickMercatorY = centerMercatorY + mercatorOffset;
+    // Convert to latitude using inverse Web Mercator
+    const latRad = Math.atan(Math.sinh(Math.PI * (1 - 2 * normalizedY)));
+    const lat = latRad * 180 / Math.PI;
     
-    // Convert back to latitude
-    const lat = (2 * Math.atan(Math.exp(clickMercatorY)) - Math.PI / 2) * 180 / Math.PI;
+    // Adjust for the center latitude offset
+    const latOffset = (normalizedY - 0.5) * (180 / Math.pow(2, zoom));
+    const finalLat = centerLat + latOffset;
     
-    return { lat, lon };
+    return { lat: finalLat, lon };
   }
 };

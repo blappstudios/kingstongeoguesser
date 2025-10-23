@@ -21,8 +21,8 @@ export const Game = {
   hintPenalty: 0,
   
   // Game settings
-  difficulty: 'medium',
   playerName: '',
+  playerEmail: '',
   
   // Round results
   roundResults: [],
@@ -42,21 +42,9 @@ export const Game = {
    * Start a new game
    */
   startGame(settings) {
-    this.difficulty = settings.difficulty || 'medium';
     this.playerName = settings.playerName || '';
-    
-    // Set total rounds based on difficulty
-    switch (this.difficulty) {
-      case 'easy':
-        this.totalRounds = 5;
-        break;
-      case 'medium':
-        this.totalRounds = 10;
-        break;
-      case 'hard':
-        this.totalRounds = 15;
-        break;
-    }
+    this.playerEmail = settings.playerEmail || '';
+    this.totalRounds = 5; // Fixed 5 rounds
     
     this.resetGame();
     this.nextRound();
@@ -64,7 +52,7 @@ export const Game = {
     this.isPlaying = true;
     this.isGameOver = false;
     
-    console.log(`🎯 Started ${this.difficulty} game with ${this.totalRounds} rounds`);
+    console.log(`🎯 Started standard game with ${this.totalRounds} rounds`);
   },
 
   /**
@@ -226,6 +214,9 @@ export const Game = {
       this.uiCallbacks.updatePersonalBest(this.getPB());
     }
     
+    // Submit score to leaderboard
+    this.submitScoreToLeaderboard();
+
     // Show final results
     if (this.uiCallbacks.showGameResults) {
       this.uiCallbacks.showGameResults({
@@ -287,6 +278,33 @@ export const Game = {
       localStorage.setItem(PB_KEY, score.toString());
     } catch (err) {
       console.warn('Failed to save PB:', err);
+    }
+  },
+
+  /**
+   * Submit score to leaderboard
+   */
+  async submitScoreToLeaderboard() {
+    try {
+      const { data, error } = await supabase
+        .from('scores')
+        .insert([
+          {
+            player_name: this.playerName,
+            player_email: this.playerEmail,
+            score: this.score,
+            accuracy: this.calculateAccuracy(),
+            avg_distance: this.totalDistance / this.roundResults.length,
+            total_rounds: this.totalRounds,
+            created_at: new Date().toISOString()
+          }
+        ]);
+
+      if (error) throw error;
+      
+      console.log('✅ Score submitted to leaderboard');
+    } catch (error) {
+      console.error('❌ Failed to submit score to leaderboard:', error);
     }
   },
 

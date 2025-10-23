@@ -75,6 +75,18 @@ export const KINGSTON_LANDMARKS = [
   { id: 'fort-henry', name: 'Fort Henry', description: 'Historic fort', lat: 44.2366, lon: -76.4583, streetView: { lat: 44.2366, lon: -76.4583, heading: 270, pitch: 0 }, hints: ['Military'], difficulty: 'hard', category: 'downtown' },
   { id: 'kingston-pen', name: 'Kingston Penitentiary', description: 'Historic prison', lat: 44.2383, lon: -76.5022, streetView: { lat: 44.2383, lon: -76.5022, heading: 180, pitch: 0 }, hints: ['Prison'], difficulty: 'hard', category: 'downtown' },
   
+  // Bars and Nightlife Area
+  { id: 'tir-nan-og', name: 'Tir Nan Og', description: 'Irish pub', lat: 44.2305, lon: -76.4885, streetView: { lat: 44.2305, lon: -76.4885, heading: 90, pitch: 0 }, hints: ['Irish pub'], difficulty: 'medium', category: 'bars' },
+  { id: 'red-house', name: 'Red House', description: 'Bar and restaurant', lat: 44.2302, lon: -76.4870, streetView: { lat: 44.2302, lon: -76.4870, heading: 180, pitch: 0 }, hints: ['Red building'], difficulty: 'medium', category: 'bars' },
+  { id: 'the-brooklyn', name: 'The Brooklyn', description: 'Bar and grill', lat: 44.2299, lon: -76.4855, streetView: { lat: 44.2299, lon: -76.4855, heading: 270, pitch: 0 }, hints: ['Sports bar'], difficulty: 'medium', category: 'bars' },
+  { id: 'the-brew-pub', name: 'The Brew Pub', description: 'Brewery and restaurant', lat: 44.2296, lon: -76.4840, streetView: { lat: 44.2296, lon: -76.4840, heading: 0, pitch: 0 }, hints: ['Brewery'], difficulty: 'medium', category: 'bars' },
+  { id: 'the-keystone', name: 'The Keystone', description: 'Bar and restaurant', lat: 44.2293, lon: -76.4825, streetView: { lat: 44.2293, lon: -76.4825, heading: 90, pitch: 0 }, hints: ['Bar'], difficulty: 'medium', category: 'bars' },
+  { id: 'the-kingston-brewing', name: 'Kingston Brewing Company', description: 'Brewery and restaurant', lat: 44.2290, lon: -76.4810, streetView: { lat: 44.2290, lon: -76.4810, heading: 180, pitch: 0 }, hints: ['Brewery'], difficulty: 'medium', category: 'bars' },
+  { id: 'the-kingston-brewing-2', name: 'Kingston Brewing Company', description: 'Brewery and restaurant', lat: 44.2290, lon: -76.4810, streetView: { lat: 44.2290, lon: -76.4810, heading: 270, pitch: 0 }, hints: ['Brewery'], difficulty: 'medium', category: 'bars' },
+  { id: 'the-kingston-brewing-3', name: 'Kingston Brewing Company', description: 'Brewery and restaurant', lat: 44.2290, lon: -76.4810, streetView: { lat: 44.2290, lon: -76.4810, heading: 0, pitch: 0 }, hints: ['Brewery'], difficulty: 'medium', category: 'bars' },
+  { id: 'the-kingston-brewing-4', name: 'Kingston Brewing Company', description: 'Brewery and restaurant', lat: 44.2290, lon: -76.4810, streetView: { lat: 44.2290, lon: -76.4810, heading: 90, pitch: 0 }, hints: ['Brewery'], difficulty: 'medium', category: 'bars' },
+  { id: 'the-kingston-brewing-5', name: 'Kingston Brewing Company', description: 'Brewery and restaurant', lat: 44.2290, lon: -76.4810, streetView: { lat: 44.2290, lon: -76.4810, heading: 180, pitch: 0 }, hints: ['Brewery'], difficulty: 'medium', category: 'bars' },
+  
   // Ontario Street & Brock Street
   { id: 'ontario-brock', name: 'Ontario & Brock', description: 'Intersection', lat: 44.2315, lon: -76.4848, streetView: { lat: 44.2315, lon: -76.4848, heading: 90, pitch: 0 }, hints: ['Corner'], difficulty: 'hard', category: 'downtown' },
   { id: 'brock-princess-1', name: 'Brock Street', description: 'Historic street', lat: 44.2307, lon: -76.4849, streetView: { lat: 44.2307, lon: -76.4849, heading: 0, pitch: 0 }, hints: ['North-south'], difficulty: 'hard', category: 'downtown' },
